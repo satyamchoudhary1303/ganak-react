@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { ComputeEngine } from 'https://unpkg.com/@cortex-js/compute-engine?module';
+import { ComputeEngine } from '@cortex-js/compute-engine';
 
 export default function Mathfield() {
   const mfRef = useRef(null);
@@ -10,6 +10,7 @@ export default function Mathfield() {
   const [isBuildActive, setIsBuildActive] = useState(false);
   const [isFormulaBuilt, setIsFormulaBuilt] = useState(false);
   const [isTestActive, setIsTestActive] = useState(false);
+  const engine = new ComputeEngine();
 
   useEffect(() => {
     const mf = mfRef.current;
@@ -37,12 +38,12 @@ export default function Mathfield() {
     updateBuildButtonStatus();
   }, [formula]);
 
-  const parseVariables = (formula) => {
+  const parseVariables = (formula)=>{
     const excludePattern = /[^=]+=|\\[a-zA-Z]+\s*/g;
     const cleanedFormula = formula.replace(excludePattern, '');
     const variableRegex = /[a-zA-Z]/g;
     const variables = cleanedFormula.match(variableRegex);
-    if (variables) {
+    if(variables){
       const uniqueVariables = [...new Set(variables)];
       const sortedVariables = uniqueVariables.sort();
       return sortedVariables;
@@ -103,14 +104,12 @@ export default function Mathfield() {
     const constantVariables = [];
     const rangeVariables = [];
     for (const variable in variableTypes) {
-      if(variableTypes[variable] === 'Constant' || variableTypes[variable] === 'Universal Constant'){
+      if (variableTypes[variable] === 'Constant' || variableTypes[variable] === 'Universal Constant') {
         constantVariables.push(variable);
-      }
-      else if(variableTypes[variable] === 'Range'){
+      } else if (variableTypes[variable] === 'Range') {
         rangeVariables.push(variable);
       }
     }
-
     return (
       <div>
         <h6>Your Formula:</h6>
@@ -150,12 +149,27 @@ export default function Mathfield() {
   const updateTestButtonStatus = () => {
     const isEmpty = Object.values(variableValues).some(value => value === '' || value === undefined);
     setIsTestActive(!isEmpty);
-  };
+  };  
 
   const handleTest = () => {
-
-  }
-
+    let testedFormula = formula;
+  
+    // Sort variables by length in descending order to replace longer names first
+    const sortedVariables = Object.keys(variableValues).sort((a, b) => b.length - a.length);
+  
+    sortedVariables.forEach(variable => {
+      // Create a regex that:
+      // - avoids variables preceded directly by a backslash (ensuring not to replace LaTeX commands)
+      // - handles variables embedded in numeric and variable concatenations
+      const regex = new RegExp(`(?<!\\\\)(?<=\\W|^)${variable}(?=\\W|$)`, 'g');
+      testedFormula = testedFormula.replace(regex, `(${variableValues[variable]})`);
+    });
+  
+    console.log("Tested Formula: ", testedFormula);
+    // Update the state or UI as needed
+  };
+  
+  
   return (
     <div className="math-field">
         <h6 htmlFor="formula">Formula:</h6>
