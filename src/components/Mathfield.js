@@ -103,9 +103,10 @@ export default function Mathfield() {
     const constantVariables = [];
     const rangeVariables = [];
     for (const variable in variableTypes) {
-      if (variableTypes[variable] === 'Constant' || variableTypes[variable] === 'Universal Constant') {
+      if(variableTypes[variable] === 'Constant' || variableTypes[variable] === 'Universal Constant'){
         constantVariables.push(variable);
-      } else if (variableTypes[variable] === 'Range') {
+      }
+      else if(variableTypes[variable] === 'Range'){
         rangeVariables.push(variable);
       }
     }
@@ -152,7 +153,7 @@ export default function Mathfield() {
   };
 
   const handleTest = () => {
-    console.log(variableValues.length);
+
   }
 
   return (
